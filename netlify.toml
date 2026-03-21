@@ -1,43 +1,11 @@
-[[headers]]
-for = "/_next/static/*"
+[build]
+command = "npm run build"
+publish = ".next/standalone"
 
-  [headers.values]
-  Cache-Control = "public, max-age=31536000, immutable"
-
-[[redirects]]
-from = "/_next/image"
-to = "/.netlify/images?url=:url&w=:width&q=:quality"
-status = 200
-
-  [redirects.query]
-  url = ":url"
-  w = ":width"
-  q = ":quality"
+[functions]
+node_bundler = "esbuild"
 
 [[redirects]]
-from = "/_ipx/*"
-to = "/.netlify/images?url=:url&w=:width&q=:quality"
+from = "/*"
+to = "/index.html"
 status = 200
-
-  [redirects.query]
-  url = ":url"
-  w = ":width"
-  q = ":quality"
-
-[context]
-
-  [context.production]
-
-    [[context.production.headers]]
-    for = "/_next/static/*"
-
-      [context.production.headers.values]
-      Cache-Control = "public, max-age=31536000, immutable"
-
-  [context.main]
-
-    [[context.main.headers]]
-    for = "/_next/static/*"
-
-      [context.main.headers.values]
-      Cache-Control = "public, max-age=31536000, immutable"
