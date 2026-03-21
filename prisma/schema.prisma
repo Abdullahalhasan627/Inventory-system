@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/cli/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// الشركات المصنعة للمعدات الكهربائية
+model Company {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  nameAr      String?  // الاسم بالعربية
+  country     String?  // بلد المنشأ
+  logo        String?  // رابط الشعار
+  isPopular   Boolean  @default(false) // هل شركة مشهورة
+  categories  String?  // الفئات المتوفرة (مفصولة بفواصل)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  products    Product[]
+  inventoryItems InventoryItem[]
+}
+
+// أنواع المنتجات الكهربائية
+model ProductCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  nameAr      String?  // الاسم بالعربية
+  description String?
+  icon        String?  // اسم الأيقونة
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  products    Product[]
+  inventoryItems InventoryItem[]
+}
+
+// المنتجات الكهربائية
+model Product {
+  id           String   @id @default(cuid())
+  model        String   // رقم الموديل
+  name         String?  // اسم المنتج
+  description  String?  // الوصف
+  amperage     Float?   // الأمبير
+  voltage      Float?   // الجهد (فولت)
+  phases       Int?     // عدد الفازات (1, 2, 3)
+  powerKw      Float?   // القدرة بالكيلو واط
+  powerHp      Float?   // القدرة بالحصان
+  specifications String? // مواصفات إضافية (JSON)
+  companyId    String
+  categoryId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  company      Company       @relation(fields: [companyId], references: [id])
+  category     ProductCategory @relation(fields: [categoryId], references: [id])
+  inventoryItems InventoryItem[]
+
+  @@unique([model, companyId])
+}
+
+// قوائم المخزون
+model InventoryList {
+  id          String   @id @default(cuid())
+  name        String   // اسم القائمة
+  description String?  // وصف القائمة
+  color       String?  // لون القائمة (hex)
+  icon        String?  // أيقونة القائمة
+  isActive    Boolean  @default(true) // هل القائمة نشطة
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       InventoryItem[]
+}
+
+// عناصر المخزون
+model InventoryItem {
+  id            String   @id @default(cuid())
+  name          String   // اسم العنصر
+  quantity      Int      @default(1)
+  incomingQty   Int      @default(0) // الكمية الداخلة
+  outgoingQty   Int      @default(0) // الكمية الخارجة
+  amperage      String?  // الأمبير (نصي لدعم AC/DC)
+  voltage       String?  // الجهد (نصي لدعم AC/DC)
+  phases        Int?     // الفاز
+  powerKw       Float?   // الكيلو واط
+  customPowerKw Boolean  @default(false) // هل تم إدخال الكيلو واط يدوياً
+  condition     String?  @default("new") // حالة المنتج: new أو used
+  location      String?  // الموقع
+  notes         String?  // ملاحظات
+  listId        String?  // معرف القائمة
+  productId     String?
+  companyId     String?
+  categoryId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  list          InventoryList? @relation(fields: [listId], references: [id])
+  product       Product?  @relation(fields: [productId], references: [id])
+  company       Company?  @relation(fields: [companyId], references: [id])
+  category      ProductCategory? @relation(fields: [categoryId], references: [id])
+}
+
+// القيم الافتراضية للمستخدم
+model UserDefaultValue {
+  id        String   @id @default(cuid())
+  fieldName String   @unique // اسم الحقل (location, company, category, etc.)
+  value     String   // القيمة المحفوظة
+  count     Int      @default(1) // عدد مرات الاستخدام
+  lastUsed  DateTime @default(now()) // آخر استخدام
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// القيم المقترحة للأمبير
+model AmperageSuggestion {
+  id        String   @id @default(cuid())
+  value     Float    @unique
+  isPopular Boolean  @default(false)
+  order     Int      @default(0)
+}
+
+// القيم المقترحة للجهد
+model VoltageSuggestion {
+  id        String   @id @default(cuid())
+  value     Float    @unique
+  isPopular Boolean  @default(false)
+  order     Int      @default(0)
+}
+
+// القيم المقترحة للفاز
+model PhaseSuggestion {
+  id        String   @id @default(cuid())
+  value     Int      @unique
+  name      String
+  isPopular Boolean  @default(false)
+  order     Int      @default(0)
+}
+// touch
