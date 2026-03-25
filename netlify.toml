@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [[headers]]
 for = "/_next/static/*"
 
@@ -41,3 +42,16 @@ status = 200
 
       [context.main.headers.values]
       Cache-Control = "public, max-age=31536000, immutable"
+=======
+[build]
+command = "npm run build"
+publish = ".next/standalone"
+
+[functions]
+node_bundler = "esbuild"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+>>>>>>> 2b6508104037404bf3e6b5c0da4f3010377500f2
